@@ -1,4 +1,4 @@
-use core::{ffi, fmt, num::NonZeroI32, slice, str};
+use core::{ffi, fmt, num::NonZeroI32, str};
 
 use crate::{esp_err_t, esp_err_to_name, ESP_OK};
 
@@ -7,7 +7,7 @@ use crate::{esp_err_t, esp_err_to_name, ESP_OK};
 /// An [`esp_err_t`] is returned from most esp-idf APIs as a status code. If it is equal
 /// to [`ESP_OK`] it means **no** error occurred.
 #[repr(transparent)]
-#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct EspError(NonZeroI32);
 
 const _: () = if ESP_OK != 0 {
@@ -77,19 +77,16 @@ impl std::error::Error for EspError {}
 
 impl fmt::Display for EspError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        unsafe fn strlen(c_s: *const ffi::c_char) -> usize {
-            let mut len = 0;
-            while *c_s.offset(len) != 0 {
-                len += 1;
-            }
-
-            len as usize
-        }
-
         unsafe {
-            let c_s = esp_err_to_name(self.code());
-            str::from_utf8_unchecked(slice::from_raw_parts(c_s as *const u8, strlen(c_s))).fmt(f)
+            let s = ffi::CStr::from_ptr(esp_err_to_name(self.code()));
+            core::fmt::Display::fmt(&str::from_utf8_unchecked(s.to_bytes()), f)
         }
+    }
+}
+
+impl fmt::Debug for EspError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{} (error code {})", self, self.code())
     }
 }
 
