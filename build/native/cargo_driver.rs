@@ -21,7 +21,7 @@ use self::chip::Chip;
 use crate::common::{
     self, list_specific_sdkconfigs, manifest_dir, sanitize_c_env_vars, sanitize_project_path,
     setup_clang_env, workspace_dir, EspIdfBuildOutput, EspIdfComponents, InstallDir, NO_PATCHES,
-    V_4_4_3_PATCHES, V_5_0_PATCHES,
+    V_4_4_3_PATCHES, V_5_0_PATCHES, V_5_2_PATCHES,
 };
 use crate::config::{BuildConfig, ESP_IDF_GLOB_VAR_PREFIX, ESP_IDF_TOOLS_INSTALL_DIR_VAR};
 
@@ -287,6 +287,7 @@ pub fn build() -> Result<EspIdfBuildOutput> {
                 NO_PATCHES
             }
             Ok((5, 0, _)) => V_5_0_PATCHES,
+            Ok((5, 2, _)) => V_5_2_PATCHES,
             Ok((5, _, _)) => NO_PATCHES,
             Ok((4, 4, _)) => V_4_4_3_PATCHES,
             Ok((major, minor, patch)) => {
